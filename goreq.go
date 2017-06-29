@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	proxy "golang.org/x/net/proxy"
 	"io"
 	"io/ioutil"
 	"log"
@@ -298,11 +299,12 @@ func (r Request) Do() (*Response, error) {
 		}
 
 		//If jar is specified new client needs to be built
-		if proxyTransport == nil || client.Jar != nil {
-			proxyTransport = &http.Transport{Dial: DefaultDialer.Dial, Proxy: http.ProxyURL(proxyUrl)}
-			proxyClient = &http.Client{Transport: proxyTransport, Jar: client.Jar}
-		} else if proxyTransport, ok := proxyTransport.(*http.Transport); ok {
-			proxyTransport.Proxy = http.ProxyURL(proxyUrl)
+		if strings.HasPrefix(r.Proxy, "socks5://") {
+			if proxyTransport == nil || client.Jar != nil {
+				dialer, _ := proxy.FromURL(proxyUrl, proxy.Direct)
+				proxyTransport = &http.Transport{Dial: dialer.Dial} //, Proxy: http.ProxyURL(proxyUrl) }
+				proxyClient = &http.Client{Transport: proxyTransport, Jar: client.Jar}
+			}
 		}
 		transport = proxyTransport
 		client = proxyClient
