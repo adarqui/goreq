@@ -245,8 +245,8 @@ var DefaultDialer = &net.Dialer{Timeout: 1000 * time.Millisecond}
 var DefaultTransport http.RoundTripper = &http.Transport{Dial: DefaultDialer.Dial, Proxy: http.ProxyFromEnvironment}
 var DefaultClient = &http.Client{Transport: DefaultTransport}
 
-var proxyTransport http.RoundTripper
-var proxyClient *http.Client
+// var proxyTransport http.RoundTripper
+// var proxyClient *http.Client
 
 func SetConnectTimeout(duration time.Duration) {
 	DefaultDialer.Timeout = duration
@@ -279,6 +279,8 @@ func (r Request) Do() (*Response, error) {
 	var transport = DefaultTransport
 	var resUri string
 	var redirectFailed bool
+	var proxyTransport http.RoundTripper
+	var proxyClient *http.Client
 
 	r.Method = valueOrDefault(r.Method, "GET")
 
